@@ -1,7 +1,6 @@
 package xcfg
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -99,7 +98,6 @@ func (s *CfgSuite) Test_03_CFG() {
 
 	MustMapToCfg(ini, cfg)
 	s.IsType(&PresetCfg{}, cfg)
-	fmt.Printf("%#v\n", cfg.Ctrl)
 	s.True(cfg.Ctrl.Debug, "debug should be true")
 
 	s.Equal(XCFG, cfg)

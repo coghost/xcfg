@@ -3,6 +3,7 @@ package xcfg
 import (
 	"embed"
 
+	"github.com/coghost/xlog"
 	"github.com/gookit/goutil/fsutil"
 	"gopkg.in/ini.v1"
 )
@@ -16,7 +17,7 @@ const (
 )
 
 type Ctrl struct {
-	WithColor bool `ini:"with_color"`
+	NoColor bool `ini:"no_color"`
 
 	Debug    bool `ini:"debug"`
 	DummyLog bool `ini:"dummy_log"`
@@ -30,6 +31,8 @@ type Ctrl struct {
 }
 
 type Log struct {
+	NoColor bool `ini:"no_color"`
+
 	Level  int  `ini:"level"`
 	Caller bool `ini:"caller"`
 	// with full caller name or not
@@ -54,8 +57,8 @@ type Updater struct {
 }
 
 type PresetCfg struct {
-	Ctrl Ctrl `ini:"ctrl"`
-	Log  Log  `ini:"log"`
+	Ctrl Ctrl         `ini:"ctrl"`
+	Log  xlog.XLogCfg `ini:"log"`
 
 	Updater Updater `ini:"updater"`
 }
@@ -87,10 +90,12 @@ func LoadSources(opts ...OptFunc) (cfg *ini.File, err error) {
 	cfg = ini.Empty()
 	// 1. embed file preset.cfg
 	dft := EfsRead(_efs, embedCfgFile)
+	cfg.Append(dft)
+
 	// 2. custom file ~/.xcfg/xcfg.cfg
 	if fsutil.PathExist(customCfgFile) {
 		custom := fsutil.ExpandPath(customCfgFile)
-		err = cfg.Append(dft, custom)
+		err = cfg.Append(custom)
 		if err != nil {
 			return
 		}
@@ -135,6 +140,6 @@ func MustMapToCfg(ini *ini.File, cfg interface{}) {
 var XCFG = &PresetCfg{}
 
 func init() {
-	var raw = MustLoadSources()
+	raw := MustLoadSources()
 	MustMapToCfg(raw, XCFG)
 }
